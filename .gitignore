@@ -1,0 +1,23 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.svelte-kit/
+build/
+dist/
+**/bin/
+**/obj/
+**/target/
+.DS_Store
+.vs/
+
+# Local logs and IDE state
+*.log
+*.user
+*.suo
+.idea/
+Thumbs.db
+
+# Machine-specific API settings
+**/appsettings.Local.json
+**/appsettings.*.Local.json
