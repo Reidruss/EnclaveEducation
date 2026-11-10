@@ -2,15 +2,21 @@
   import { onMount } from 'svelte';
   import { api } from '$lib/api';
   import type { Course, Assignment } from '@enclave/contracts';
+
   let courses = $state<Course[]>([]), assignments = $state<Assignment[]>([]);
   let code = $state(''), name = $state(''), courseId = $state(''), title = $state('');
   let durationMinutes = $state(60), language = $state('python');
   let error = $state(''), busy = $state(false), loading = $state(true);
+
   async function refresh() {
     [courses, assignments] = await Promise.all([api.courses(), api.assignments()]);
-    if (!courseId) courseId = courses[0]?.id ?? '';
+    if (!courseId) 
+      courseId = courses[0]?.id ?? '';
   }
-  onMount(() => { refresh().catch(e => error = `Could not load workspace: ${e.message}. Start the API on port 5080.`).finally(() => loading = false); });
+  onMount(() => { 
+    refresh().catch(e => {error = `Could not load workspace: ${e.message}. Start the API on port 5080.`;}).finally(() => loading = false); 
+  });
+    
   async function save(kind: 'course' | 'assignment') {
     busy = true; error = '';
     try {
@@ -21,6 +27,8 @@
     finally { busy = false; }
   }
 </script>
+
+
 <div class="eyebrow">Professor workspace / development demo</div><h1>Classes & assignments</h1>
 <p class="notice">Demo endpoints are available only in Development. Changes disappear when the API restarts.</p>
 {#if error}<p class="error" role="alert">{error}</p>{/if}

@@ -4,7 +4,7 @@ A monorepo skeleton for web-managed computer science classes and coding exams de
 
 ## Layout
 
-- `apps/web` — SvelteKit + TypeScript: landing page, class and assignment creation, registration placeholder, downloads placeholder.
+- `apps/web` — SvelteKit + TypeScript: landing page, Supabase email/password login, account page, gated class and assignment demo, downloads placeholder.
 - `apps/desktop` — Tauri 2 + Svelte + Vite: assignment draft viewer and scratch code editor.
 - `services/EnclaveEducation.Api` — ASP.NET Core 10 minimal API with development-only, in-memory class and assignment endpoints.
 - `packages/contracts` — shared TypeScript DTOs and API client. Keep these in sync with the C# records; generated OpenAPI contracts are a future improvement.
@@ -35,14 +35,17 @@ Or preview only its UI in a browser (no native prerequisites):
 npm run dev -w @enclave/desktop
 ```
 
-Create a class and assignment in the web workspace, then click **Connect to demo API** in the desktop app. The desktop editor is an unsaved scratch area; selecting a draft does not create an exam session.
+Click **Connect to demo API** in the desktop app to view demo data. The desktop editor is an unsaved scratch area; selecting a draft does not create an exam session.
 
 Optional: copy each app's `.env.example` to `.env` to customize its API URL. If changing the desktop API origin, also update the Tauri CSP in `tauri.conf.json`; configure allowed browser origins in the API settings. Never put secrets in public frontend environment variables.
+
+To connect web sign-in, set your Supabase project URL and publishable key in `apps/web/.env`. See [authentication setup](docs/authentication.md) for dashboard setup, test accounts, and the remaining instructor/API authorization work. The classes page stays blocked until that authorization is implemented.
 
 ## Verify and build
 
 ```sh
 npm run check
+npm run test:auth -w @enclave/web
 npm run build
 npm run build:desktop
 ```
@@ -51,9 +54,9 @@ npm run build:desktop
 
 ## Scope
 
-Implemented: responsive starter screens, shared API types, development-only class/assignment CRUD subset (list, get, create), input validation, API CORS configuration, and Tauri application wiring.
+Implemented: responsive starter screens, Supabase web email/password sign-in and sign-out, a protected account page, shared API types, development-only class/assignment CRUD subset (list, get, create), input validation, API CORS configuration, and Tauri application wiring.
 
-Not implemented: accounts, roles, persistence, enrollment, exam scheduling or sessions, code execution, grading, submission storage, signed downloads, auto-updates, or lockdown controls. No credentials are collected by the registration placeholder. All API demo data resets on restart. See the architecture document before adding production endpoints.
+Not implemented: registration, account recovery, instructor roles, API authorization, application data persistence, enrollment, exam scheduling or sessions, code execution, grading, submission storage, signed downloads, auto-updates, or lockdown controls. All API demo data resets on restart. See the architecture document before adding production endpoints.
 
 The application is not ready to administer real exams. Tauri alone does not enforce OS lockdown; restrictions require platform-specific design, testing, and an explicit threat model.
 

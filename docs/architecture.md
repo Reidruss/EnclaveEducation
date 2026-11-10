@@ -4,6 +4,8 @@ The SvelteKit web application owns professor and student onboarding, class manag
 
 The current API deliberately exposes its in-memory demo routes only in Development. It has no authentication. Production currently serves only the health endpoint. CORS is browser policy, not authorization.
 
+The web app now supports Supabase email/password login, verified server-side cookie sessions, and sign-out. See [authentication setup](authentication.md). This does not yet authenticate the ASP.NET API or grant instructor access; the classes page remains blocked until API authorization and instructor approval are implemented.
+
 ## Planned domain
 
 - User: external identity subject, institution membership, authorized roles.
