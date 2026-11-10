@@ -10,6 +10,8 @@
     "node": ">=22.12"
   },
   "scripts": {
+    "format": "prettier --write . && dotnet format whitespace EnclaveEducation.slnx --no-restore",
+    "format:check": "prettier --check . && dotnet format whitespace EnclaveEducation.slnx --no-restore --verify-no-changes",
     "dev": "concurrently -k -n api,web \"npm:dev:api\" \"npm:dev:web\"",
     "dev:web": "npm run dev -w @enclave/web -- --host 127.0.0.1 --port 5173 --strictPort",
     "dev:api": "dotnet run --project services/EnclaveEducation.Api --launch-profile http",
@@ -19,6 +21,8 @@
     "build:desktop": "npm run tauri -w @enclave/desktop -- build"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "prettier": "^3.9.10",
+    "prettier-plugin-svelte": "^4.1.1"
   }
 }

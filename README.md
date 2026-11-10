@@ -29,6 +29,8 @@ In another terminal, launch the native client:
 npm run dev:desktop
 ```
 
+On Linux, the desktop launcher restores host GTK settings saved by VS Code's Snap package. This avoids a startup crash about the missing `org.gnome.settings-daemon.plugins.xsettings` `antialiasing` key when launching from its integrated terminal.
+
 Or preview only its UI in a browser (no native prerequisites):
 
 ```sh
@@ -42,6 +44,10 @@ Optional: copy each app's `.env.example` to `.env` to customize its API URL. If 
 To connect web sign-in, set your Supabase project URL and publishable key in `apps/web/.env`. See [authentication setup](docs/authentication.md) for dashboard setup, test accounts, and the remaining instructor/API authorization work. The classes page stays blocked until that authorization is implemented.
 
 ## Verify and build
+
+Both Svelte apps use [Tailwind CSS with the Vite plugin](https://tailwindcss.com/docs/installation/using-vite). Style components with utility classes in the `.svelte` markup. Shared colors and fonts are defined with `@theme` in `apps/web/src/app.css` and `apps/desktop/src/app.css`; these generate utilities such as `bg-canvas` and `text-muted`. Each app scans its own `src` directory. The stylesheets import Tailwind's theme and utilities without Preflight to retain the existing browser defaults for headings, paragraphs, lists, and forms.
+
+Run `npm run format` to format the frontend, shared TypeScript, configuration files, and C# API. Run `npm run format:check` to check formatting without rewriting files. These commands require the .NET SDK; generated files and build output are excluded. Rust source follows standard rustfmt formatting (`cargo fmt --manifest-path apps/desktop/src-tauri/Cargo.toml` when rustfmt is installed).
 
 ```sh
 npm run check

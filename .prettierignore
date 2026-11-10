@@ -1,0 +1,16 @@
+node_modules/
+**/.svelte-kit/
+**/dist/
+**/build/
+**/target/
+**/bin/
+**/obj/
+**/gen/
+**/icons/
+.git/
+.idea/
+.agents/
+.codex/
+.aws/
+package-lock.json
+**/Cargo.lock

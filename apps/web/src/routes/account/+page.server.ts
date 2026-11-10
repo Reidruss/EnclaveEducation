@@ -12,5 +12,5 @@ export const actions: Actions = {
     const { error } = await locals.supabase.auth.signOut({ scope: 'local' });
     if (error) return fail(503, { message: 'Could not sign out. Please try again.' });
     redirect(303, '/login');
-  }
+  },
 };

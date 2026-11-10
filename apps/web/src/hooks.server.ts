@@ -15,7 +15,7 @@ export const handle: Handle = async ({ event, resolve }) => {
         path: '/',
         httpOnly: true,
         sameSite: 'lax',
-        secure: event.url.protocol === 'https:'
+        secure: event.url.protocol === 'https:',
       },
       cookies: {
         getAll: () => event.cookies.getAll(),
@@ -23,8 +23,8 @@ export const handle: Handle = async ({ event, resolve }) => {
           for (const { name, value, options } of cookies) {
             event.cookies.set(name, value, { ...options, path: '/' });
           }
-        }
-      }
+        },
+      },
     });
 
     // getUser verifies the session with Supabase; never trust cookie contents alone.

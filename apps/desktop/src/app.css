@@ -1,0 +1,26 @@
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities) source('./');
+
+@theme {
+  --font-sans: system-ui, sans-serif;
+  --font-mono: monospace;
+  --color-canvas: #101e1c;
+  --color-ink: #e4eee7;
+  --color-muted: #a6bdb0;
+  --color-divider: #30433c;
+  --color-accent: #c2dd9a;
+  --color-accent-ink: #18352e;
+  --color-editor: #132521;
+  --color-code: #d4e9ba;
+}
+
+@layer base {
+  body {
+    @apply m-0 bg-canvas font-sans text-ink;
+  }
+
+  * {
+    @apply box-border;
+  }
+}
