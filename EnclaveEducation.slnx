@@ -1,5 +1,0 @@
-<Solution>
-  <Folder Name="/services/">
-    <Project Path="services/EnclaveEducation.Api/EnclaveEducation.Api.csproj" />
-  </Folder>
-</Solution>
