@@ -5,7 +5,7 @@ A monorepo skeleton for web-managed computer science classes and coding exams de
 ## Layout
 
 - `apps/web` — SvelteKit + TypeScript: landing page, Supabase email/password login, account page, gated class and assignment demo, downloads placeholder.
-- `apps/desktop` — Tauri 2 + Svelte + Vite: assignment draft viewer and scratch code editor.
+- `apps/desktop` — Tauri 2 + Svelte + Vite: student code entry and remembered development enrollment.
 - `services/EnclaveEducation.Api` — ASP.NET Core 10 minimal API with development-only, in-memory class and assignment endpoints.
 - `packages/contracts` — shared TypeScript DTOs and API client. Keep these in sync with the C# records; generated OpenAPI contracts are a future improvement.
 - `docs/architecture.md` — boundaries and implementation roadmap.
@@ -37,7 +37,11 @@ Or preview only its UI in a browser (no native prerequisites):
 npm run dev -w @enclave/desktop
 ```
 
-Click **Connect to demo API** in the desktop app to view demo data. The desktop editor is an unsaved scratch area; selecting a draft does not create an exam session.
+Enter **ENCLAVE-DEMO** in the desktop app to join the development **CS 201** class. Invalid codes show an error. The client saves an opaque session token on this device and checks it with the API each time the app opens, skipping code entry while enrollment remains valid. Connection failures offer a retry and keep the saved token. **Use a different student code** clears the local session.
+
+This fixture is available only with the API in Development. Its enrollment lasts 90 days from API startup, and sessions are held in memory: restarting the API requires entering the code again. Production needs personalized code issuance, durable enrollment/session storage, revocation, and appropriate credential storage before this can serve real students. Assignments and exam delivery are not connected yet.
+
+The Svelte flow is split into `apps/desktop/src/Login.svelte` (form state and submission), `App.svelte` (startup checks and conditional screens), and `enrollment.ts` (saving/restoring sessions). `$state` makes form and enrollment values reactive; `bind:value` connects the input to its variable; the form calls the parent through an `onsubmit` prop; `{#if}` selects the screen. The server decides whether the saved enrollment is still valid.
 
 Optional: copy each app's `.env.example` to `.env` to customize its API URL. If changing the desktop API origin, also update the Tauri CSP in `tauri.conf.json`; configure allowed browser origins in the API settings. Never put secrets in public frontend environment variables.
 
@@ -52,6 +56,7 @@ Run `npm run format` to format the frontend, shared TypeScript, configuration fi
 ```sh
 npm run check
 npm run test:auth -w @enclave/web
+npm run test:enrollment -w @enclave/desktop
 npm run build
 npm run build:desktop
 ```
@@ -62,7 +67,7 @@ npm run build:desktop
 
 Implemented: responsive starter screens, Supabase web email/password sign-in and sign-out, a protected account page, shared API types, development-only class/assignment CRUD subset (list, get, create), input validation, API CORS configuration, and Tauri application wiring.
 
-Not implemented: registration, account recovery, instructor roles, API authorization, application data persistence, enrollment, exam scheduling or sessions, code execution, grading, submission storage, signed downloads, auto-updates, or lockdown controls. All API demo data resets on restart. See the architecture document before adding production endpoints.
+Not implemented: registration, account recovery, instructor roles, production API authorization, application data persistence, production enrollment, exam scheduling or sessions, code execution, grading, submission storage, signed downloads, auto-updates, or lockdown controls. All API demo data resets on restart. See the architecture document before adding production endpoints.
 
 The application is not ready to administer real exams. Tauri alone does not enforce OS lockdown; restrictions require platform-specific design, testing, and an explicit threat model.
 

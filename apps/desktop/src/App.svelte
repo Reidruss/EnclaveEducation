@@ -1,104 +1,111 @@
 <script lang="ts">
-  import { EnclaveApi, type Assignment } from '@enclave/contracts';
+  import { onMount } from 'svelte';
+  import { ApiError, EnclaveApi, type StudentEnrollment } from '@enclave/contracts';
+  import Login from './Login.svelte';
+  import { enrollStudent, restoreEnrollment, SessionStorageError } from './enrollment';
 
-  const api = new EnclaveApi(import.meta.env.VITE_API_URL || 'http://localhost:5080');
-
-  let assignments = $state<Assignment[]>([]);
-  let selected = $state('');
-  let code = $state('# Your exam workspace\n');
-
-  let status = $state('Connect to load assignment drafts from the development API.');
-
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5080';
+  const api = new EnclaveApi(apiUrl);
+  const storageKey = `enclave.student-session:${apiUrl}`;
+  let enrollment = $state<StudentEnrollment | null>(null);
+  let checking = $state(true);
   let busy = $state(false);
+  let error = $state('');
+  let startupError = $state('');
 
-  async function connect() {
-    busy = true;
+  async function restore() {
+    checking = true;
+    startupError = '';
     try {
-      assignments = await api.assignments();
-      status = assignments.length
-        ? 'Drafts loaded. Exam sessions are not implemented.'
-        : 'Connected. Create an assignment in the web app first.';
-    } catch (e) {
-      status = e instanceof Error ? e.message : 'Connection failed';
+      enrollment = await restoreEnrollment(api, localStorage, storageKey);
+    } catch {
+      startupError = 'We could not check your enrollment. Check your connection and try again.';
+    } finally {
+      checking = false;
+    }
+  }
+
+  async function joinClass(code: string) {
+    if (busy) return;
+    busy = true;
+    error = '';
+    try {
+      enrollment = await enrollStudent(api, localStorage, storageKey, code);
+    } catch (cause) {
+      error =
+        cause instanceof ApiError || cause instanceof SessionStorageError
+          ? cause.message
+          : 'We could not reach your class. Check your connection and try again.';
     } finally {
       busy = false;
     }
   }
+
+  function switchStudent() {
+    try {
+      localStorage.removeItem(storageKey);
+      enrollment = null;
+      error = '';
+    } catch {
+      error = 'Unable to clear the saved student. Please try again.';
+    }
+  }
+  onMount(() => {
+    void restore();
+  });
 </script>
 
-<main>
+<main class="flex min-h-screen flex-col">
   <header
-    class="flex justify-between gap-5 border-b border-divider px-[30px] py-6 max-[700px]:flex-col"
+    class="flex flex-wrap items-center justify-between gap-4 border-b border-divider px-8 py-6"
   >
-    <strong>▣ Enclave Education</strong>
-    <span class="text-muted">Desktop / Development preview</span>
+    <strong class="text-base tracking-tight">
+      <span class="mr-2 text-accent" aria-hidden="true">▣</span>
+      Enclave Education
+    </strong>
+    <span class="text-xs text-muted">Student desktop</span>
   </header>
-
-  <div class="grid min-h-[calc(100vh-75px)] grid-cols-[320px_1fr] max-[700px]:grid-cols-1">
-    <aside class="border-r border-divider p-[30px]">
-      <p class="leading-[1.65] text-[11px] uppercase tracking-[0.1em] text-[#b5d791]">
-        Exam workspace
-      </p>
-      <h1 class="text-[32px]">Ready to focus.</h1>
-      <p class="text-[14px] leading-[1.65] text-muted">
-        Assigned coding exams will appear here when exam delivery is connected.
-      </p>
-      <button
-        class="
-          cursor-pointer rounded-md border-0 bg-accent px-4 py-3 font-semibold text-accent-ink
-          disabled:cursor-not-allowed disabled:opacity-50
-        "
-        onclick={connect}
-        disabled={busy}
+  <div class="flex flex-1 items-center justify-center px-6 py-12">
+    {#if checking}
+      <p class="text-sm text-muted" role="status">Checking your enrollment…</p>
+    {:else if startupError}
+      <section
+        class="w-full max-w-[440px] rounded-2xl border border-divider bg-editor p-8 text-center"
       >
-        {busy ? 'Connecting…' : 'Connect to demo API'}
-      </button>
-
-      <p class="text-[14px] leading-[1.65] text-muted" role="status">{status}</p>
-      <label class="text-[13px]">
-        Assignment draft
-        <select
-          class="mt-[10px] w-full rounded-[5px] border border-[#607569] bg-[#20352b] p-[10px] text-white"
-          bind:value={selected}
-        >
-          <option value="">Select a draft</option>
-
-          {#each assignments as a}
-            <option value={a.id}>
-              {a.title} · {a.durationMinutes} min
-            </option>
-          {/each}
-        </select>
-      </label>
-      <p class="text-[14px] leading-[1.65] text-muted rounded-md border border-[#60734f] p-[14px]">
-        Preview only. No lockdown controls are active. Code is not saved or submitted.
-      </p>
-    </aside>
-    <section class="min-w-0 p-7">
-      <div class="flex items-center justify-between gap-[18px] py-4 text-[12px]">
-        Scratch editor <span class="text-muted">Local preview · unsaved</span>
-      </div>
-      <label class="text-[13px] sr-only" for="code">Code editor</label>
-      <textarea
-        class="
-          h-[60vh] w-full resize-y rounded-lg border border-[#304a3d] bg-editor p-[22px]
-          font-mono text-[14px] leading-[1.8] text-code
-        "
-        id="code"
-        bind:value={code}
-        spellcheck="false"></textarea>
-      <footer class="flex items-center justify-between gap-[18px] py-4 text-[12px] text-muted">
-        <span>Execution and submission will be connected in a future milestone.</span>
+        <h1 class="text-2xl">Let’s reconnect</h1>
+        <p class="text-sm leading-relaxed text-muted" role="alert">{startupError}</p>
         <button
-          class="
-            cursor-pointer rounded-md border-0 bg-accent px-4 py-3 font-semibold text-accent-ink
-            disabled:cursor-not-allowed disabled:opacity-50
-          "
-          disabled
+          class="mt-4 cursor-pointer rounded-lg border-0 bg-accent px-5 py-3 font-semibold text-accent-ink"
+          onclick={restore}
         >
-          Submit exam
+          Try again
         </button>
-      </footer>
-    </section>
+      </section>
+    {:else if enrollment}
+      <section class="w-full max-w-[640px] rounded-2xl border border-divider bg-editor p-8 sm:p-10">
+        <p class="m-0 text-xs font-semibold uppercase tracking-[0.16em] text-accent">
+          Your classroom
+        </p>
+        <h1 class="mb-3 mt-4 text-3xl font-semibold">Welcome, {enrollment.studentName}.</h1>
+        <p class="text-lg">{enrollment.course.code} · {enrollment.course.name}</p>
+        <p class="text-sm leading-relaxed text-muted">
+          You’re signed in to your class. Your assignments will appear here when exam delivery is
+          connected.
+        </p>
+        <p class="text-xs text-muted">
+          Enrolled through {new Date(enrollment.expiresAt).toLocaleDateString()}.
+        </p>
+        {#if error}<p role="alert">{error}</p>{/if}
+        <button
+          class="mt-6 cursor-pointer rounded-lg border border-divider bg-canvas px-4 py-3 text-sm text-ink hover:border-accent focus-visible:outline-accent"
+          onclick={switchStudent}
+        >
+          Use a different student code
+        </button>
+      </section>
+    {:else}
+      <Login onsubmit={joinClass} {busy} {error} />
+    {/if}
   </div>
+  <footer class="px-6 pb-6 text-center text-xs text-muted">A focused space for your class.</footer>
 </main>

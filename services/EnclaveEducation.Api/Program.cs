@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
@@ -20,8 +21,41 @@ if (app.Environment.IsDevelopment())
     var assignments = new ConcurrentDictionary<Guid, Assignment>();
     var demo = new Course(Guid.Parse("a0ca1ee0-4ebd-42af-9f34-922d79aa0123"), "CS 201", "Data structures");
     courses[demo.Id] = demo;
+    var studentSessions = new ConcurrentDictionary<string, StudentEnrollment>();
+    var demoEnrollment = new StudentEnrollment("Demo student", demo, DateTimeOffset.UtcNow.AddDays(90));
 
     var api = app.MapGroup("/api");
+    var studentApi = api.MapGroup("/student").AddEndpointFilter(async (context, next) =>
+    {
+        context.HttpContext.Response.Headers.CacheControl = "no-store";
+        return await next(context);
+    });
+    // Development fixture only. Production must use durable, authorized enrollment records.
+    studentApi.MapPost("/enrollment", (EnterStudentCode input) =>
+    {
+        if (!string.Equals(input.Code?.Trim(), "ENCLAVE-DEMO", StringComparison.OrdinalIgnoreCase))
+            return Results.Problem(statusCode: 400, detail: "That student code was not recognized. Check the code from your instructor and try again.");
+        if (demoEnrollment.ExpiresAt <= DateTimeOffset.UtcNow)
+            return Results.Problem(statusCode: 410, detail: "Your enrollment has ended. Ask your instructor for a new student code.");
+
+        var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+        studentSessions[token] = demoEnrollment;
+        return Results.Ok(new StudentSession(token, demoEnrollment));
+    });
+
+    studentApi.MapGet("/enrollment", (HttpRequest request) =>
+    {
+        var authorization = request.Headers.Authorization.ToString();
+        if (!authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) ||
+            !studentSessions.TryGetValue(authorization[7..], out var enrollment))
+            return Results.Problem(statusCode: 401, detail: "Please enter your student code to join your class.");
+        if (enrollment.ExpiresAt <= DateTimeOffset.UtcNow)
+        {
+            studentSessions.TryRemove(authorization[7..], out _);
+            return Results.Problem(statusCode: 410, detail: "Your enrollment has ended. Ask your instructor for a new student code.");
+        }
+        return Results.Ok(enrollment);
+    });
     api.MapGet("/courses", () => courses.Values.OrderBy(c => c.Code));
     api.MapGet("/assignments", () => assignments.Values.OrderBy(a => a.Title));
 
@@ -72,6 +106,9 @@ if (app.Environment.IsDevelopment())
 app.Run();
 
 record Course(Guid Id, string Code, string Name);
+record EnterStudentCode(string? Code);
+record StudentEnrollment(string StudentName, Course Course, DateTimeOffset ExpiresAt);
+record StudentSession(string Token, StudentEnrollment Enrollment);
 record Assignment(
     Guid Id,
     Guid CourseId,

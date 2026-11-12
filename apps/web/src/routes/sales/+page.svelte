@@ -2,18 +2,18 @@
 
 <section aria-labelledby="demo-heading">
   <h1
-    class="mt-[18px] mb-6 max-w-[820px] text-[clamp(32px,5vw,62px)] leading-[1.08] tracking-[-0.045em]"
+    class="mt-4.5 mb-6 max-w-205 text-[clamp(32px,5vw,62px)] leading-[1.08] tracking-[-0.045em]"
     id="demo-heading"
   >
     Request a demo from Enclave
   </h1>
-  <p class="max-w-[720px] leading-[1.65]">Fields marked with * are required.</p>
+  <p class="max-w-180 leading-[1.65]">Fields marked with * are required.</p>
 
   <form action="/demo-requests" method="post">
     <div>
       <label class="my-4 block text-[14px]" for="full-name">Full name *</label>
       <input
-        class="mt-[7px] block w-full rounded-md border border-input-border bg-white p-[11px] [font:inherit]"
+        class="mt-1.75 block w-full rounded-md border border-input-border bg-white p-2.75 [font:inherit]"
         type="text"
         id="full-name"
         name="fullName"
@@ -25,7 +25,7 @@
     <div>
       <label class="my-4 block text-[14px]" for="email">School or work email *</label>
       <input
-        class="mt-[7px] block w-full rounded-md border border-input-border bg-white p-[11px] [font:inherit]"
+        class="mt-1.75 block w-full rounded-md border border-input-border bg-white p-2.75 [font:inherit]"
         type="email"
         id="email"
         name="email"
@@ -37,7 +37,7 @@
     <div>
       <label class="my-4 block text-[14px]" for="institution">School or institution name *</label>
       <input
-        class="mt-[7px] block w-full rounded-md border border-input-border bg-white p-[11px] [font:inherit]"
+        class="mt-1.75 block w-full rounded-md border border-input-border bg-white p-2.75 [font:inherit]"
         type="text"
         id="institution"
         name="institution"
@@ -49,7 +49,7 @@
     <div>
       <label class="my-4 block text-[14px]" for="role">Your role *</label>
       <select
-        class="mt-[7px] block w-full rounded-md border border-input-border bg-white p-[11px] [font:inherit]"
+        class="mt-1.75 block w-full rounded-md border border-input-border bg-white p-[11px] [font:inherit]"
         id="role"
         name="role"
         required
@@ -66,7 +66,7 @@
     <div>
       <label class="my-4 block text-[14px]" for="institution-type">Institution type *</label>
       <select
-        class="mt-[7px] block w-full rounded-md border border-input-border bg-white p-[11px] [font:inherit]"
+        class="mt-1.75 block w-full rounded-md border border-input-border bg-white p-[11px] [font:inherit]"
         id="institution-type"
         name="institutionType"
         required
@@ -83,11 +83,11 @@
       <label class="my-4 block text-[14px]" for="student-count">
         Estimated students who would use it *
       </label>
-      <p class="max-w-[720px] leading-[1.65]" id="student-count-help">
+      <p class="max-w-180px leading-[1.65]" id="student-count-help">
         Estimate for your class, department, or planned rollout.
       </p>
       <select
-        class="mt-[7px] block w-full rounded-md border border-input-border bg-white p-[11px] [font:inherit]"
+        class="mt-1.75px block w-full rounded-md border border-input-border bg-white p-[11px] [font:inherit]"
         id="student-count"
         name="studentCount"
         aria-describedby="student-count-help"
@@ -107,7 +107,7 @@
         What would you like to explore in the demo? (optional)
       </label>
       <textarea
-        class="mt-[7px] block w-full rounded-md border border-input-border bg-white p-[11px] [font:inherit]"
+        class="mt-1.75 block w-full rounded-md border border-input-border bg-white p-[11px] [font:inherit]"
         id="demo-goals"
         name="demoGoals"
         rows="4"
@@ -115,7 +115,7 @@
         placeholder="Tell us about your subjects, programming languages, or exam needs."></textarea>
     </div>
 
-    <p class="max-w-[720px] leading-[1.65]">
+    <p class="max-w-180 leading-[1.65]">
       We’ll use these details to respond to your request. Read our <a
         class="text-link underline-offset-4"
         href="/privacy"
